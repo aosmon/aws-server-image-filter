@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import { RSA_NO_PADDING } from 'constants';
 
 (async () => {
 
@@ -30,9 +31,11 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   /**************************************************************************** */
   app.get("/filteredimage", async (req, res) => {
     let {image_url} = req.query;
-    image_url = image_url.substring(2, image_url.length-2);
+    if(!image_url) {
+      res.status(422).send("Please provide valid image url");
+    }
     const imageFile = await filterImageFromURL(image_url);
-    res.sendFile(imageFile, function (err) {
+    res.status(200).sendFile(imageFile, function (err) {
       if (err) {
         res.status(500).send(err);
       } else {
